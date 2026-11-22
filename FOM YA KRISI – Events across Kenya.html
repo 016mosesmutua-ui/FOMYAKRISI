@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FOM YA KRISI – Events across Kenya</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--panel:#f6f6f4;--line:#e2e2de;--text:#141414;--muted:#6b6b66;--accent:#0f8a5f;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px}
+header{padding:48px 0 24px}
+.brand{font-weight:800;font-size:1.1rem;letter-spacing:-.01em}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.call{color:var(--accent);font-weight:600;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:7px 14px}footer a{color:var(--accent)}
+h1{font-size:clamp(2.4rem,8vw,4.4rem);line-height:1.02;letter-spacing:-.03em;font-weight:800;margin:28px 0 14px;max-width:14ch}
+.lead{color:var(--muted);max-width:52ch;margin:0 0 28px;font-size:1.05rem}
+.controls{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+@media(max-width:560px){.controls{grid-template-columns:1fr}}
+input,select{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:var(--text);padding:12px 14px;font:inherit}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 8px}
+button{font:inherit;cursor:pointer;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:7px 14px}
+button:hover{border-color:#999}
+.chips button[aria-pressed=true]{background:var(--text);color:#fff;border-color:var(--text)}
+.count{color:var(--muted);font-size:.9rem;margin:18px 0 10px}
+.list{display:grid;gap:12px;padding-bottom:40px}
+.ev{display:grid;grid-template-columns:76px 1fr auto;gap:16px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+@media(max-width:560px){.ev{grid-template-columns:64px 1fr}.price{grid-column:2}}
+.date{text-align:center;border-right:1px solid var(--line);padding-right:12px}
+.date b{display:block;font-size:1.8rem;line-height:1;font-weight:800}
+.date span{color:var(--muted);font-size:.85rem}
+.ev h3{margin:0 0 2px;font-size:1.1rem}
+.meta{color:var(--muted);font-size:.9rem}
+.tag{display:inline-block;margin-top:6px;font-size:.78rem;border:1px solid var(--line);border-radius:999px;padding:1px 10px;color:var(--accent)}
+.price{font-weight:600;white-space:nowrap}
+.empty{color:var(--muted);padding:40px 0;text-align:center}
+.add{border-top:1px solid var(--line);padding:36px 0 56px}
+.add h2{margin:0 0 6px;font-size:1.5rem;letter-spacing:-.01em}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:16px 0}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.grid .full{grid-column:1/-1}
+.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600;padding:11px 20px;border-radius:12px}
+.note{color:var(--muted);font-size:.85rem;margin-top:10px}
+footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--muted);font-size:.85rem}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="top"><div class="brand">FOM YA KRISI</div><a class="call" href="https://wa.me/254745102332" target="_blank" rel="noopener">WhatsApp 0745 102 332</a></div>
+    <h1>Find out what's happening near you in Kenya.</h1>
+    <p class="lead">Concerts, markets, sports, tech meetups and more, from Nairobi to Mombasa to Kisumu. Pick your town and see what's on.</p>
+    <div class="controls">
+      <input id="q" type="text" placeholder="Search events or venues" aria-label="Search events">
+      <select id="town" aria-label="Town"></select>
+    </div>
+    <div class="chips" id="chips"></div>
+  </header>
+
+  <main>
+    <div class="count" id="count" role="status"></div>
+    <div class="list" id="list"></div>
+
+    <section class="add" id="add">
+      <h2>Hosting something? Add your event.</h2>
+      <div class="meta">It appears in the list right away. You can also send your event details on <a href="https://wa.me/254745102332" target="_blank" rel="noopener" style="color:var(--accent)">WhatsApp 0745 102 332</a>.</div>
+      <div class="grid">
+        <input id="fTitle" type="text" placeholder="Event name" aria-label="Event name" class="full">
+        <select id="fTown" aria-label="Town"></select>
+        <input id="fVenue" type="text" placeholder="Venue" aria-label="Venue">
+        <input id="fDate" type="date" aria-label="Date">
+        <select id="fCat" aria-label="Category"></select>
+        <input id="fPrice" type="text" placeholder="Price in KES (leave empty if free)" aria-label="Price" class="full" inputmode="numeric">
+      </div>
+      <button class="primary" id="save">Add event</button>
+      <p class="note">The events above are samples to show how Krisi works. This version doesn't save new events after you close the page.</p>
+    </section>
+  </main>
+  <footer>FOM YA KRISI, events across Kenya. Contact: <a href="tel:0745102332">0745 102 332</a></footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+var TOWNS=["Nairobi","Mombasa","Kisumu","Nakuru","Eldoret","Nyeri","Malindi","Naivasha","Thika","Ruiru"];
+var CATS=["Music","Food","Sports","Tech","Arts","Community"];
+var events=[
+ {t:"Sunset Live Sessions",town:"Nairobi",v:"Karura Forest lawn",d:"2026-12-05",c:"Music",p:1500},
+ {t:"Street Food Saturday",town:"Nairobi",v:"Westlands open grounds",d:"2026-12-12",c:"Food",p:0},
+ {t:"Developer Meetup",town:"Nairobi",v:"iHub, Ngong Road",d:"2026-12-03",c:"Tech",p:0},
+ {t:"Beach Football Cup",town:"Mombasa",v:"Nyali Beach",d:"2026-12-07",c:"Sports",p:300},
+ {t:"Swahili Night Market",town:"Mombasa",v:"Old Town",d:"2026-12-18",c:"Food",p:0},
+ {t:"Lakeside Jazz Evening",town:"Kisumu",v:"Dunga Beach",d:"2026-12-10",c:"Music",p:800},
+ {t:"Young Artists Showcase",town:"Kisumu",v:"Kisumu Museum",d:"2026-12-14",c:"Arts",p:200},
+ {t:"Half Marathon",town:"Eldoret",v:"Kipchoge Stadium",d:"2026-12-06",c:"Sports",p:1000},
+ {t:"Clean-up Day",town:"Nakuru",v:"Lake Nakuru gate",d:"2026-12-09",c:"Community",p:0},
+ {t:"Craft & Coffee Fair",town:"Nyeri",v:"Dedan Kimathi grounds",d:"2026-12-13",c:"Food",p:100},
+ {t:"Weekend Hike & Picnic",town:"Naivasha",v:"Hell's Gate entrance",d:"2026-12-20",c:"Community",p:500},
+ {t:"Founders Coffee Hour",town:"Ruiru",v:"Ruiru town hall",d:"2026-12-11",c:"Tech",p:0}
+];
+var f={q:"",town:"All",cat:"All"};
+var $=function(i){return document.getElementById(i)};
+var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function opts(sel,arr,first){sel.innerHTML="";if(first){var o=document.createElement("option");o.value="All";o.textContent=first;sel.appendChild(o)}arr.forEach(function(x){var o=document.createElement("option");o.value=x;o.textContent=x;sel.appendChild(o)})}
+function chips(){
+  var box=$("chips");box.innerHTML="";
+  ["All"].concat(CATS).forEach(function(c){var b=document.createElement("button");b.textContent=c==="All"?"All events":c;b.setAttribute("aria-pressed",String(f.cat===c));b.onclick=function(){f.cat=c;chips();render()};box.appendChild(b)});
+}
+function render(){
+  var q=f.q.toLowerCase();
+  var rows=events.filter(function(e){
+    return (f.town==="All"||e.town===f.town)&&(f.cat==="All"||e.c===f.cat)&&(!q||(e.t+" "+e.v+" "+e.town).toLowerCase().indexOf(q)>-1)
+  }).sort(function(a,b){return a.d<b.d?-1:1});
+  $("count").textContent=rows.length+(rows.length===1?" event":" events")+(f.town==="All"?" across Kenya":" in "+f.town);
+  var box=$("list");box.innerHTML="";
+  if(!rows.length){box.innerHTML='<div class="empty">No events match. Try another town or category, or add your own below.</div>';return}
+  rows.forEach(function(e){
+    var p=e.d.split("-"),el=document.createElement("article");el.className="ev";
+    var dt=document.createElement("div");dt.className="date";
+    var b=document.createElement("b");b.textContent=String(parseInt(p[2],10));
+    var s=document.createElement("span");s.textContent=MON[parseInt(p[1],10)-1];
+    dt.appendChild(b);dt.appendChild(s);
+    var mid=document.createElement("div");
+    var h=document.createElement("h3");h.textContent=e.t;
+    var m=document.createElement("div");m.className="meta";m.textContent=e.v+", "+e.town;
+    var tg=document.createElement("span");tg.className="tag";tg.textContent=e.c;
+    mid.appendChild(h);mid.appendChild(m);mid.appendChild(tg);
+    var pr=document.createElement("div");pr.className="price";pr.textContent=e.p>0?"KES "+e.p.toLocaleString():"Free";
+    el.appendChild(dt);el.appendChild(mid);el.appendChild(pr);box.appendChild(el);
+  });
+}
+function toast(m){var t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on")},2200)}
+
+opts($("town"),TOWNS,"All towns");opts($("fTown"),TOWNS);opts($("fCat"),CATS);
+$("town").onchange=function(){f.town=this.value;render()};
+$("q").oninput=function(){f.q=this.value;render()};
+$("save").onclick=function(){
+  var t=$("fTitle").value.trim(),v=$("fVenue").value.trim(),d=$("fDate").value;
+  if(!t||!v||!d){toast("Add a name, venue and date first");return}
+  var price=parseInt($("fPrice").value.replace(/[^0-9]/g,""),10)||0;
+  events.push({t:t,town:$("fTown").value,v:v,d:d,c:$("fCat").value,p:price});
+  ["fTitle","fVenue","fDate","fPrice"].forEach(function(i){$(i).value=""});
+  f={q:"",town:"All",cat:"All"};$("q").value="";$("town").value="All";chips();render();
+  toast("Event added");window.scrollTo({top:0,behavior:"smooth"});
+};
+chips();render();
+</script>
+</body>
+</html>
